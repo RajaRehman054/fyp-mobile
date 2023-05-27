@@ -1,1 +1,1 @@
-export default url = 'https://fyp-server-six.vercel.app/';
+export default url = 'http://192.168.1.2:4000';
