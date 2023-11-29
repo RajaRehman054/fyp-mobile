@@ -32,6 +32,7 @@ export default function Converstion({ navigation, conversation, currentUser }) {
         style={{ width: "100%", flexDirection: "row" }}
         onPress={() =>
           navigation.navigate("DirectMessage", {
+            conversation: conversation,
             currentChatUser: user,
             currentUser: currentUser,
           })

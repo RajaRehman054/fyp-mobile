@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -6,19 +6,120 @@ import {
   StyleSheet,
   SafeAreaView,
   TextInput,
+  FlatList,
 } from "react-native";
 import { Avatar } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import url from "../../utils/url.js";
 import img1 from "../../assets/img1.png";
+import MessageOther from "../../components/ChatComp/MessageOther.jsx";
+import MessageOwn from "../../components/ChatComp/MessageOwn.jsx";
+import { io } from "socket.io-client";
 
 export default function DirectMessage({ navigation, route }) {
-  const { currentChatUser, currentUser } = route.params;
-  console.log(currentUser.username);
+  const { conversation, currentChatUser, currentUser } = route.params;
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [currentChat, setCurrentChat] = useState(conversation);
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+  const socket = useRef();
+  const scrollRef = useRef();
+  let listViewRef;
+
+  useEffect(() => {
+    socket.current = io("ws://localhost:4000");
+    socket.current.on("getMessage", (data) => {
+      setArrivalMessage({
+        sender: data.senderId,
+        text: data.text,
+        createdAt: Date.now(),
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    arrivalMessage &&
+      currentChat?.members.includes(arrivalMessage.sender) &&
+      setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, currentChat]);
+
+  useEffect(() => {
+    socket.current.emit("addUser", currentUser._id);
+  }, [currentUser]);
+
+  // get messages of a current converstion
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const res = await fetch(
+          `${url}/conversation/getmessages/${currentChat._id}`,
+          {
+            headers: {
+              "content-type": "application/json",
+            },
+          }
+        );
+        const response = await res.json();
+        setMessages(response);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getMessages();
+  }, [currentChat]);
+
+  // create new message
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const message = {
+      sender: currentUser._id,
+      text: newMessage,
+      conversationId: currentChat._id,
+    };
+    const receiverId = currentChat.members.find(
+      (member) => member !== currentUser._id
+    );
+
+    socket.current.emit("sendMessage", {
+      senderId: currentUser._id,
+      receiverId,
+      text: newMessage,
+    });
+
+    try {
+      const res = await fetch(`${url}/conversation/newmessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
+      const response = await res.json();
+      setMessages([...messages, response]);
+      setNewMessage("");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      listViewRef.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  //messages are called here
+  const renderItem = ({ item }) =>
+    item.sender === currentUser._id ? (
+      <MessageOwn item={item} />
+    ) : (
+      <MessageOther item={item} />
+    );
 
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
-      <View style={{ flex: 1 }}>
+      <View>
+        {/*top bar showing profile info */}
         <View style={styles.uppertab}>
           <View style={styles.innertab}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -59,22 +160,55 @@ export default function DirectMessage({ navigation, route }) {
         </View>
       </View>
 
+      {/*chat area showing  messages */}
+      {messages.length === 0 ? (
+        <View
+          style={{
+            width: "100%",
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ color: "black", fontSize: 16, fontWeight: "bold" }}>
+            Be the First to send a message
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          ref={(ref) => {
+            listViewRef = ref;
+          }}
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={(item, index) =>
+            item.id ? item.id.toString() : index.toString()
+          }
+          style={{
+            width: "100%",
+            flex: 1,
+          }}
+        />
+      )}
+
+      {/*type messages area */}
       <View style={styles.buttonview}>
         <View style={styles.messagebar}>
           <View style={styles.container}>
-            <TouchableOpacity>
-              <TextInput
-                style={styles.input}
-                placeholder="Type message...."
-                placeholderTextColor={"darkgray"}
-              />
-            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Type message...."
+              placeholderTextColor={"darkgray"}
+              onChangeText={setNewMessage}
+              value={newMessage}
+            />
           </View>
-          <TouchableOpacity style={styles.iconview}>
+          <TouchableOpacity
+            style={styles.iconview}
+            onPress={handleSubmit}
+            disabled={!newMessage.trim()}
+          >
             <Ionicons name="paper-plane" color={"white"} size={25} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconview}>
-            <Ionicons name="camera" color={"white"} size={25} />
           </TouchableOpacity>
         </View>
       </View>
@@ -86,7 +220,7 @@ const styles = StyleSheet.create({
   uppertab: {
     height: 70,
     backgroundColor: "white",
-    marginBottom: 5,
+    marginBottom: 10,
     alignItems: "center",
     shadowColor: "#171717",
     shadowOffset: { width: -2, height: 4 },
@@ -104,7 +238,7 @@ const styles = StyleSheet.create({
   },
   buttonview: {
     flexDirection: "row",
-    height: 90,
+    height: 80,
     width: "90%",
     alignSelf: "center",
     justifyContent: "space-between",
@@ -126,8 +260,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   container: {
-    width: "65%",
-    alignItems: "center",
+    width: "82%",
+    padding: 4,
     backgroundColor: "#F5F5F5",
     elevation: 5,
     height: 50,

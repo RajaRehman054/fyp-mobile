@@ -101,8 +101,15 @@ export default function HomeScreen({ navigation }) {
               Watch
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("Notification")}>
-            <Ionicons name="notifications" color={"#FF8216"} size={30} />
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("Notification", {
+                user: userData,
+              })
+            }
+            disabled
+          >
+            <Ionicons name="notifications" color={"transparent"} size={30} />
           </TouchableOpacity>
         </View>
       </View>

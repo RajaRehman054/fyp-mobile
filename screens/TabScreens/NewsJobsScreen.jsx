@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import {
   Text,
   View,
@@ -12,14 +12,36 @@ import {
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import ColumnView from "../../components/ColumnView";
-
+import { AuthContext } from "../../auth/AuthContext";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const img1 = require("../../assets/img1.png");
+import url from "../../utils/url.js";
 
 export default function ProfileHomeScreen({ navigation }) {
   const [activeScreenIndex, setActiveScreenIndex] = useState(0);
   const scrollViewRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [jobs, setJobs] = useState([]);
+  const { user } = useContext(AuthContext);
+
+  // useEffect(() => {
+  //   const getJobs = async () => {
+  //     try {
+  //       const res = await fetch(`${url}/users/jobs`, {
+  //         headers: {
+  //           "content-type": "application/json",
+  //           Authorization: `Bearer ${user}`,
+  //         },
+  //       });
+  //       const response = await res.json();
+  //       setJobs(response);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
+  //   getJobs();
+  // }, [user]);
+
   const handleScreenPress = (index) => {
     setActiveScreenIndex(index);
     scrollViewRef.current.scrollTo({

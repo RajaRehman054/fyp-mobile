@@ -6,43 +6,24 @@ import {
   SafeAreaView,
   TextInput,
   FlatList,
+  Modal,
+  ScrollView,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { io } from "socket.io-client";
 import url from "../../utils/url.js";
+import { Avatar } from "react-native-paper";
+import img1 from "../../assets/img1.png";
 import Converstion from "../../components/ChatComp/Converstion.jsx";
 
 export default function MessageChat({ navigation, route }) {
   const { userData } = route.params;
+  const [modalVisible, setModalVisible] = useState(false);
   const [conversations, setConversations] = useState([]);
-  const [currentChat, setCurrentChat] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [arrivalMessage, setArrivalMessage] = useState(null);
-  const [currentChatUser, setCurrentChatUser] = useState("");
-  const socket = useRef();
-
-  useEffect(() => {
-    socket.current = io("ws://localhost:4000");
-    socket.current.on("getMessage", (data) => {
-      setArrivalMessage({
-        sender: data.senderId,
-        text: data.text,
-        createdAt: Date.now(),
-      });
-    });
-  }, []);
-
-  useEffect(() => {
-    arrivalMessage &&
-      currentChat?.members.includes(arrivalMessage.sender) &&
-      setMessages((prev) => [...prev, arrivalMessage]);
-  }, [arrivalMessage, currentChat]);
-
-  useEffect(() => {
-    socket.current.emit("addUser", userData.user._id);
-  }, [userData.user]);
+  const newChatArray = Array.isArray(userData.user.following)
+    ? userData.user.following
+    : [];
 
   // get converstions of the current user
   useEffect(() => {
@@ -61,6 +42,64 @@ export default function MessageChat({ navigation, route }) {
     };
     getConversations();
   }, [userData.user._id]);
+
+  //Create new Converstion from following
+  const createConversation = async (e) => {
+    const convoArr = [];
+    var exists = false;
+    for (let i = 0; i < conversations.length; i++) {
+      convoArr[i] = conversations[i].members.find(
+        (m) => m !== userData.user._id
+      );
+    }
+    for (let i = 0; i < conversations.length; i++) {
+      if (convoArr[i] === e.user._id) {
+        exists = true;
+        break;
+      }
+    }
+
+    if (exists === true) {
+      setModalVisible(false);
+      Alert.alert("", "Converstion already exists", [
+        {
+          text: "OK",
+        },
+      ]);
+    } else {
+      const convo = {
+        senderId: userData.user._id,
+        receiverId: e.user._id,
+      };
+      try {
+        await fetch(`${url}/conversation`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(convo),
+        });
+        await getConversationNow();
+        setModalVisible(false);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  const getConversationNow = async () => {
+    try {
+      const res = await fetch(`${url}/conversation/${userData.user._id}`, {
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+      const response = await res.json();
+      setConversations(response);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   //converstions are called here
   const renderItem = ({ item }) => (
@@ -90,7 +129,7 @@ export default function MessageChat({ navigation, route }) {
               Chats
             </Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Ionicons name="add" color={"black"} size={30} />
           </TouchableOpacity>
         </View>
@@ -112,6 +151,67 @@ export default function MessageChat({ navigation, route }) {
         renderItem={renderItem}
         keyExtractor={(item, index) => item._id || index.toString()}
       />
+
+      {/*create new chat Modal */}
+      <Modal animationType="fade" transparent={true} visible={modalVisible}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modal}>
+            <View style={styles.modalheader}>
+              <TouchableOpacity disabled>
+                <Ionicons name="close" color={"transparent"} size={30} />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Start Chat with Followings</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" color={"black"} size={30} />
+              </TouchableOpacity>
+            </View>
+            {newChatArray.length === 0 ? (
+              <TouchableOpacity style={styles.modallistcomp} disabled>
+                <Text
+                  style={{
+                    fontWeight: "bold",
+                    color: "black",
+                  }}
+                >
+                  0 Following
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <ScrollView>
+                {newChatArray.map((element, index) => (
+                  <TouchableOpacity
+                    style={styles.modallistcomp}
+                    key={index}
+                    onPress={() => createConversation(element)}
+                  >
+                    <View style={styles.iconimg}>
+                      <Avatar.Image
+                        source={
+                          element.user.picture
+                            ? {
+                                uri: `${url}/users/picture?path=${element.user.picture}`,
+                              }
+                            : img1
+                        }
+                        size={50}
+                      />
+                    </View>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "black",
+                        marginLeft: 10,
+                      }}
+                    >
+                      {element.user.username}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -156,5 +256,40 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "darkgray",
     padding: 10,
+  },
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modal: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    width: "90%",
+    maxHeight: "60%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FF8216",
+  },
+  modalheader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginBottom: 5,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "black",
+  },
+  modallistcomp: {
+    height: 60,
+    flexDirection: "row",
+    padding: 5,
+    alignItems: "center",
   },
 });

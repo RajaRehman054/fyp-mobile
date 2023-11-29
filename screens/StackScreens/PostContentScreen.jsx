@@ -117,25 +117,6 @@ export default function PostContentScreen({ navigation, route }) {
             <TouchableOpacity style={styles.button11}>
               <View style={{ width: "15%" }}>
                 <Ionicons
-                  name="link"
-                  color={"black"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-              <Text style={styles.text12}>Add learn more Link</Text>
-              <View style={{ width: "15%", marginLeft: "auto" }}>
-                <Ionicons
-                  name="add"
-                  color={"darkgray"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button11}>
-              <View style={{ width: "15%" }}>
-                <Ionicons
                   name="location-outline"
                   color={"black"}
                   size={25}
@@ -152,50 +133,13 @@ export default function PostContentScreen({ navigation, route }) {
                 />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button11}>
-              <View style={{ width: "15%" }}>
-                <Ionicons
-                  name="lock-closed-outline"
-                  color={"black"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-              <Text style={styles.text12}>where to post</Text>
-              <View style={{ width: "15%", marginLeft: "auto" }}>
-                <Ionicons
-                  name="chevron-forward"
-                  color={"darkgray"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button11}>
-              <View style={{ width: "15%" }}>
-                <Ionicons
-                  name="cash-outline"
-                  color={"black"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-              <Text style={styles.text12}>Set Price</Text>
-              <View style={{ width: "15%", marginLeft: "auto" }}>
-                <Ionicons
-                  name="chevron-forward"
-                  color={"darkgray"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.buttonview}>
           <TouchableOpacity
             style={[styles.messagebutton, { backgroundColor: "darkgray" }]}
+            onPress={() => navigation.goBack()}
           >
             <Text
               style={{
@@ -204,7 +148,7 @@ export default function PostContentScreen({ navigation, route }) {
                 fontSize: 16,
               }}
             >
-              Draft
+              Cancel
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -254,6 +198,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 50,
   },
   messagebutton: {
     justifyContent: "center",
