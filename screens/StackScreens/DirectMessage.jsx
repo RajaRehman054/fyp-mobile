@@ -27,7 +27,7 @@ export default function DirectMessage({ navigation, route }) {
   let listViewRef;
 
   useEffect(() => {
-    socket.current = io("ws://localhost:4000");
+    socket.current = io(url);
     socket.current.on("getMessage", (data) => {
       setArrivalMessage({
         sender: data.senderId,
