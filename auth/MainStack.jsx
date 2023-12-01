@@ -12,6 +12,7 @@ import Teleprompter from "../screens/StackScreens/Teleprompter";
 import CameraRecording from "../screens/StackScreens/CameraRecording";
 import PostContentScreen from "../screens/StackScreens/PostContentScreen";
 import BuyContent from "../screens/StackScreens/BuyContent";
+import Jobdetails from "../screens/StackScreens/Jobdetails";
 import { UserContext } from "../context/UserContext";
 import Loader from "../components/Loader";
 
@@ -37,6 +38,7 @@ const MainStack = () => {
       <Stack.Screen name="Teleprompter" component={Teleprompter} />
       <Stack.Screen name="PostContentScreen" component={PostContentScreen} />
       <Stack.Screen name="BuyContent" component={BuyContent} />
+      <Stack.Screen name="Jobdetails" component={Jobdetails} />
     </Stack.Navigator>
   );
 };

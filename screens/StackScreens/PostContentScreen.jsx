@@ -13,6 +13,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import VideoPlayer from "../../components/VideoPlayerComp/VideoPlayer";
 import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../../components/Loader";
+import Toast from "react-native-toast-message";
 
 export default function PostContentScreen({ navigation, route }) {
   const { user } = useContext(AuthContext);
@@ -20,27 +21,34 @@ export default function PostContentScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState("");
   const uploadVideo = async () => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("video", {
-      uri: route.params.uri,
-      type: "video/mp4",
-      name: "video",
-    });
-    formData.append("tags", tags);
-    const response = await fetch(`${url}/videos/upload?desc=${text}`, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${user}`,
-        tags: tags,
-      },
-    });
-    if (response.ok) {
-      navigation.navigate("TabNavigator");
+    if (tags === "" || text === "") {
+      Toast.show({
+        type: "error",
+        text1: "Fill in all fields",
+      });
     } else {
-      console.log("error");
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("video", {
+        uri: route.params.uri,
+        type: "video/mp4",
+        name: "video",
+      });
+      formData.append("tags", tags);
+      const response = await fetch(`${url}/videos/upload?desc=${text}`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${user}`,
+          tags: tags,
+        },
+      });
+      if (response.ok) {
+        navigation.navigate("TabNavigator");
+      } else {
+        console.log("error");
+      }
     }
   };
   if (loading) {
@@ -112,28 +120,6 @@ export default function PostContentScreen({ navigation, route }) {
               onChangeText={setTags}
             />
           </View>
-
-          <View style={{ marginTop: 10 }}>
-            <TouchableOpacity style={styles.button11}>
-              <View style={{ width: "15%" }}>
-                <Ionicons
-                  name="location-outline"
-                  color={"black"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-              <Text style={styles.text12}>Add Location</Text>
-              <View style={{ width: "15%", marginLeft: "auto" }}>
-                <Ionicons
-                  name="chevron-forward"
-                  color={"darkgray"}
-                  size={25}
-                  style={{ alignSelf: "center" }}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.buttonview}>
@@ -198,7 +184,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 50,
+    marginTop: 60,
   },
   messagebutton: {
     justifyContent: "center",

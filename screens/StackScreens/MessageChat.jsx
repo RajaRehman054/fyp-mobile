@@ -8,7 +8,6 @@ import {
   FlatList,
   Modal,
   ScrollView,
-  Alert,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -16,6 +15,7 @@ import url from "../../utils/url.js";
 import { Avatar } from "react-native-paper";
 import img1 from "../../assets/img1.png";
 import Converstion from "../../components/ChatComp/Converstion.jsx";
+import Toast from "react-native-toast-message";
 
 export default function MessageChat({ navigation, route }) {
   const { userData } = route.params;
@@ -61,11 +61,10 @@ export default function MessageChat({ navigation, route }) {
 
     if (exists === true) {
       setModalVisible(false);
-      Alert.alert("", "Converstion already exists", [
-        {
-          text: "OK",
-        },
-      ]);
+      Toast.show({
+        type: "error",
+        text1: "Converstion already exists",
+      });
     } else {
       const convo = {
         senderId: userData.user._id,
@@ -81,6 +80,10 @@ export default function MessageChat({ navigation, route }) {
         });
         await getConversationNow();
         setModalVisible(false);
+        Toast.show({
+          type: "success",
+          text1: "Converstion created",
+        });
       } catch (err) {
         console.log(err);
       }

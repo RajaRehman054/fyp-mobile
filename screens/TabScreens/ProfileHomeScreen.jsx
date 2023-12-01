@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useContext } from "react";
 import {
   Text,
   View,
@@ -20,15 +20,21 @@ import ColumnView from "../../components/ColumnView";
 import { UserContext } from "../../context/UserContext";
 import { AuthContext } from "../../auth/AuthContext";
 import url from "../../utils/url";
+import WalletModal from "../../components/ProfileHomeComp/WalletModal";
 
 const img1 = require("../../assets/img1.png");
 
 export default function ProfileHomeScreen({ navigation }) {
   const [activeScreenIndex, setActiveScreenIndex] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
   const [render, setRender] = useState(false);
   const { userData, getUser } = useContext(UserContext);
   const { user } = useContext(AuthContext);
   const scrollViewRef = useRef(null);
+
+  const onCloseModal = (visible) => {
+    setModalVisible(visible);
+  };
 
   const selectImage = () => {
     ImagePicker.launchImageLibrary({}, async (response) => {
@@ -94,6 +100,7 @@ export default function ProfileHomeScreen({ navigation }) {
             onPress={() =>
               navigation.navigate("MessageChat", { userData: userData })
             }
+            style={{ width: "25%" }}
           >
             <Ionicons name="chatbubble" color={"#FF8216"} size={30} />
           </TouchableOpacity>
@@ -108,9 +115,24 @@ export default function ProfileHomeScreen({ navigation }) {
               {userData.user.username}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
-            <Ionicons name="ellipsis-horizontal" color={"#FF8216"} size={30} />
-          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "25%",
+              justifyContent: "space-between",
+            }}
+          >
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Ionicons name="wallet" color={"#FF8216"} size={30} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+              <Ionicons
+                name="ellipsis-horizontal"
+                color={"#FF8216"}
+                size={30}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -239,6 +261,11 @@ export default function ProfileHomeScreen({ navigation }) {
           </SafeAreaView>
         </ScrollView>
       </ScrollView>
+      <WalletModal
+        modalVisible={modalVisible}
+        onCloseModal={onCloseModal}
+        user={userData.user}
+      />
     </SafeAreaView>
   );
 }
