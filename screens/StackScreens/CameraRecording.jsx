@@ -62,6 +62,7 @@ export default function CameraRecording({ navigation, route }) {
   const zoom = useSharedValue(0);
   const img1 = require("../../assets/penguin.gif");
   const [hirer, setHirer] = useState([]);
+  const [isRecordingInProgress, setIsRecordingInProgress] = useState(false);
   useFocusEffect(
     useCallback(() => {
       Orientation.lockToLandscape();
@@ -119,6 +120,7 @@ export default function CameraRecording({ navigation, route }) {
   const animatedProps = useAnimatedProps(() => ({ zoom: zoom.value }), [zoom]);
 
   const start = async () => {
+    setIsRecordingInProgress(true);
     const watermarkText =
       userData.user.hirer === null ? userData.user.username : hirer.username;
     setRecording(true);
@@ -235,30 +237,34 @@ export default function CameraRecording({ navigation, route }) {
         <View style={{ width: "68%", height: "100%" }}>
           {displayText === "" ? <View></View> : <ScriptView />}
         </View>
-        <View style={{ width: "16%" }}>
-          <TouchableOpacity style={{ margin: 10 }} onPress={changeCamera}>
-            <Ionicons name="sync" color={"white"} size={30} />
-          </TouchableOpacity>
-          <TouchableOpacity style={{ margin: 10 }}>
-            <Ionicons name="flash" color={"white"} size={30} />
-          </TouchableOpacity>
-          <TouchableOpacity style={{ margin: 10 }}>
-            <Feather
-              name="zoom-in"
-              color="white"
-              size={30}
-              onPress={zoomIncrease}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={{ margin: 10 }}>
-            <Feather
-              name="zoom-out"
-              color="white"
-              size={30}
-              onPress={zoomDecrease}
-            />
-          </TouchableOpacity>
-        </View>
+        {isRecordingInProgress ? (
+          <View style={{ width: "16%" }}></View>
+        ) : (
+          <View style={{ width: "16%" }}>
+            <TouchableOpacity style={{ margin: 10 }} onPress={changeCamera}>
+              <Ionicons name="sync" color={"white"} size={30} />
+            </TouchableOpacity>
+            <TouchableOpacity style={{ margin: 10 }}>
+              <Ionicons name="flash" color={"white"} size={30} />
+            </TouchableOpacity>
+            <TouchableOpacity style={{ margin: 10 }}>
+              <Feather
+                name="zoom-in"
+                color="white"
+                size={30}
+                onPress={zoomIncrease}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={{ margin: 10 }}>
+              <Feather
+                name="zoom-out"
+                color="white"
+                size={30}
+                onPress={zoomDecrease}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={styles.lasttab}>

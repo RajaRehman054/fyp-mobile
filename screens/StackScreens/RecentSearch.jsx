@@ -9,6 +9,7 @@ import {
   TextInput,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { Picker } from "@react-native-picker/picker";
 
 const RecentSearch = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +17,9 @@ const RecentSearch = ({ navigation }) => {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
+  };
+  const handleValueChange = (itemValue, itemIndex) => {
+    setSelectedValue(itemValue);
   };
 
   return (
@@ -44,17 +48,7 @@ const RecentSearch = ({ navigation }) => {
 
       <ScrollView style={styles.topscooper}>
         <View style={styles.container}>
-          <View
-            style={{
-              backgroundColor: "green",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              width: "20%",
-              borderBottomLeftRadius: 50,
-              borderTopLeftRadius: 50,
-            }}
-          ></View>
+          <Ionicons name="search" style={styles.icon} size={20} />
           <TextInput
             style={styles.input}
             placeholder="Search"
@@ -62,6 +56,32 @@ const RecentSearch = ({ navigation }) => {
             onChangeText={handleSearch}
             value={searchQuery}
           />
+        </View>
+        <View style={styles.container}>
+          <View
+            style={{
+              backgroundColor: "orange",
+              height: "100%",
+              width: "30%",
+              borderBottomLeftRadius: 50,
+              borderTopLeftRadius: 50,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={handleValueChange}
+            >
+              <Picker.Item label="Name" value="name" />
+              <Picker.Item label="Tag" value="tag" />
+              <Picker.Item label="Description" value="descp" />
+            </Picker>
+
+            {/* Display the chosen value */}
+            <Text style={{ color: "black" }}>{selectedValue}</Text>
+          </View>
           <TouchableOpacity
             style={{
               backgroundColor: "green",
@@ -116,7 +136,6 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 20,
   },
-
   container: {
     width: "100%",
     flexDirection: "row",
@@ -124,9 +143,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
     alignSelf: "center",
     elevation: 5,
-    height: 50,
+    height: 40,
     borderRadius: 50,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   icon: {
     color: "darkgray",
