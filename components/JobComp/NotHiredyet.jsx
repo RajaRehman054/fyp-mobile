@@ -17,11 +17,11 @@ import JobsBar from "../JobComp/JobsBar.jsx";
 import { UserContext } from "../../context/UserContext.jsx";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
+import Blink from "./Blink.jsx";
 
 export default function NotHiredyet({ navigation }) {
   const [activeScreenIndex, setActiveScreenIndex] = useState(0);
   const scrollViewRef = useRef(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [publicJobs, setPublicJobs] = useState([]);
   const [AppliedJobs, setAppliedJobs] = useState([]);
   const { user } = useContext(AuthContext);
@@ -60,7 +60,6 @@ export default function NotHiredyet({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
       getJobs();
       getAppliedJobs();
       setLoading(false);
@@ -82,137 +81,134 @@ export default function NotHiredyet({ navigation }) {
     setActiveScreenIndex(currentIndex);
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
-    <>
-      {loading ? (
-        <Loader />
-      ) : (
-        <ScrollView>
-          <View style={styles.imageicon}>
-            <View style={{ width: "85%" }}>
-              <Text
-                style={{
-                  fontSize: 23,
-                  fontWeight: "bold",
-                  color: "white",
-                  margin: 5,
-                }}
-              >
-                Hello! {userData.user.username}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  color: "white",
-                  margin: 5,
-                }}
-              >
-                Let's find Jobs for you
-              </Text>
-            </View>
-
-            <View style={styles.container}>
-              <Ionicons name="search" style={styles.icon} size={20} />
-              <TouchableOpacity>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Search"
-                  placeholderTextColor="darkgray"
-                  onChangeText={setSearchQuery}
-                  value={searchQuery}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.followercount1}>
-            <TouchableOpacity
-              onPress={() => handleScreenPress(0)}
-              style={{
-                width: "45%",
-                borderBottomColor:
-                  activeScreenIndex === 0 ? "#FF8216" : "white",
-                borderBottomWidth: 3,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: activeScreenIndex === 0 ? "#FF8216" : "gray",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                }}
-              >
-                Public Jobs
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleScreenPress(1)}
-              style={{
-                width: "45%",
-                borderBottomColor:
-                  activeScreenIndex === 1 ? "#FF8216" : "white",
-                borderBottomWidth: 3,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: activeScreenIndex === 1 ? "#FF8216" : "gray",
-                  fontSize: 16,
-                  fontWeight: "bold",
-                }}
-              >
-                Applied Jobs
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal={true}
-            pagingEnabled={true}
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={handleScroll}
+    <ScrollView>
+      <View style={styles.imageicon}>
+        <View style={{ width: "85%" }}>
+          <Text
+            style={{
+              fontSize: 23,
+              fontWeight: "bold",
+              color: "white",
+              margin: 5,
+            }}
           >
-            <SafeAreaView style={styles.screen1}>
-              {publicJobs.length === 0 ? (
-                <Text style={{ color: "black", textAlign: "center" }}>
-                  No New Jobs yet
-                </Text>
-              ) : (
-                publicJobs.map((e, index) => (
-                  <JobsBar
-                    key={index}
-                    navigation={navigation}
-                    e={e}
-                    job={"Public"}
-                  />
-                ))
-              )}
-            </SafeAreaView>
-            <SafeAreaView style={styles.screen1}>
-              {AppliedJobs.length === 0 ? (
-                <Text style={{ color: "black", textAlign: "center" }}>
-                  No jobs applied yet
-                </Text>
-              ) : (
-                AppliedJobs.map((e, index) => (
-                  <JobsBar
-                    key={index}
-                    navigation={navigation}
-                    e={e}
-                    job={"Applied"}
-                  />
-                ))
-              )}
-            </SafeAreaView>
-          </ScrollView>
-        </ScrollView>
-      )}
-    </>
+            Hello! {userData.user.username}
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "bold",
+              color: "white",
+              margin: 5,
+            }}
+          >
+            Let's find Jobs for you
+          </Text>
+        </View>
+        <View style={styles.container}>
+          <Blink duration={1000}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                color: "#FF8216",
+                textAlign: "center",
+              }}
+            >
+              Apply on current Jobs Now
+            </Text>
+          </Blink>
+        </View>
+      </View>
+      <View style={styles.followercount1}>
+        <TouchableOpacity
+          onPress={() => handleScreenPress(0)}
+          style={{
+            width: "45%",
+            borderBottomColor: activeScreenIndex === 0 ? "#FF8216" : "white",
+            borderBottomWidth: 3,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: activeScreenIndex === 0 ? "#FF8216" : "gray",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            Public Jobs
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleScreenPress(1)}
+          style={{
+            width: "45%",
+            borderBottomColor: activeScreenIndex === 1 ? "#FF8216" : "white",
+            borderBottomWidth: 3,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: activeScreenIndex === 1 ? "#FF8216" : "gray",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            Applied Jobs
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal={true}
+        pagingEnabled={true}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScroll}
+      >
+        <SafeAreaView style={styles.screen1}>
+          {publicJobs.length === 0 ? (
+            <Text style={{ color: "black", textAlign: "center" }}>
+              No New Jobs yet
+            </Text>
+          ) : (
+            publicJobs.map((e, index) => (
+              <JobsBar
+                key={index}
+                navigation={navigation}
+                e={e}
+                job={"Public"}
+              />
+            ))
+          )}
+        </SafeAreaView>
+        <SafeAreaView style={styles.screen1}>
+          {AppliedJobs.length === 0 ? (
+            <Text style={{ color: "black", textAlign: "center" }}>
+              No jobs applied yet
+            </Text>
+          ) : (
+            AppliedJobs.map((e, index) => (
+              <JobsBar
+                key={index}
+                navigation={navigation}
+                e={e}
+                job={"Applied"}
+              />
+            ))
+          )}
+        </SafeAreaView>
+      </ScrollView>
+    </ScrollView>
   );
 }
 
@@ -240,6 +236,7 @@ const styles = StyleSheet.create({
   container: {
     width: "85%",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#F5F5F5",
     elevation: 5,
     height: 40,

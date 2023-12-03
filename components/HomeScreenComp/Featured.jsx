@@ -9,38 +9,29 @@ import {
 } from "react-native";
 import { Avatar } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
-import MyScreen from "../Modal";
 import url from "../../utils/url";
 import VideoPlayer from "../VideoPlayerComp/VideoPlayer";
 import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
 
-export default function Featured({ navigation, profile, render }) {
+export default function Featured({ navigation, render }) {
   const [heartFilled, setHeartFilled] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const onPressHeart = () => {
     setHeartFilled(!heartFilled);
   };
-  const onCloseModal = (visible) => {
-    setModalVisible(visible);
-  };
 
   const getVideos = async () => {
     setLoading(true);
-    const res = await fetch(
-      profile ? `${url}/videos/myvideos` : `${url}/videos/`,
-      {
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${user}`,
-        },
-      }
-    );
+    const res = await fetch(`${url}/videos/`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${user}`,
+      },
+    });
     const response = await res.json();
     setData(response);
     setLoading(false);
@@ -69,7 +60,11 @@ export default function Featured({ navigation, profile, render }) {
           />
           <View style={{ marginLeft: 10 }}>
             <TouchableOpacity
-              onPress={() => navigation.navigate("OthersProfile")}
+              onPress={() =>
+                navigation.navigate("OthersProfile", {
+                  user1: item,
+                })
+              }
             >
               <Text
                 style={{
@@ -86,8 +81,12 @@ export default function Featured({ navigation, profile, render }) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Ionicons name="ellipsis-horizontal" color={"black"} size={30} />
+        <TouchableOpacity disabled>
+          <Ionicons
+            name="ellipsis-horizontal"
+            color={"transparent"}
+            size={30}
+          />
         </TouchableOpacity>
       </View>
 
@@ -116,14 +115,13 @@ export default function Featured({ navigation, profile, render }) {
 
         <TouchableOpacity
           style={styles.icon}
-          onPress={() => navigation.navigate("BuyContent")}
+          onPress={() =>
+            navigation.navigate("BuyContent", {
+              video: item,
+            })
+          }
         >
           <Ionicons name="download-outline" color={"gray"} size={25} />
-          <Text style={{ color: "gray" }}>16</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.icon}>
-          <Ionicons name="paper-plane-outline" color={"gray"} size={25} />
           <Text style={{ color: "gray" }}>16</Text>
         </TouchableOpacity>
       </View>
@@ -136,18 +134,26 @@ export default function Featured({ navigation, profile, render }) {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-      />
-
-      <MyScreen
-        modalVisible={modalVisible}
-        onCloseModal={onCloseModal}
-        title="loading"
-        message="I'm thinking"
-      />
+      {data.length === 0 ? (
+        <View style={{ alignSelf: "center", height: 40 }}>
+          <Text
+            style={{
+              color: "#FF8216",
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: 20,
+            }}
+          >
+            No videos to Show
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+        />
+      )}
     </SafeAreaView>
   );
 }

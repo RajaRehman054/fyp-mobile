@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Text,
   View,
@@ -10,32 +10,66 @@ import {
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Avatar } from "react-native-paper";
+import img1 from "../../assets/img1.png";
+import { UserContext } from "../../context/UserContext";
+import { AuthContext } from "../../auth/AuthContext";
+import OtherProfileVideo from "../../components/ProfileHomeComp/OtherProfileVideo";
 
-import Featured from "../../components/HomeScreenComp/Featured";
-import ColumnView from "../../components/ColumnView";
-
-const img1 = require("../../assets/img1.png");
-
-export default function OthersProfile({ navigation }) {
-  const [activeComponent, setActiveComponent] = useState(1);
-
-  const handleComponentChange = (componentName) => {
-    setActiveComponent(componentName);
+export default function OthersProfile({ navigation, route }) {
+  const { user1 } = route.params;
+  const { userData, getUser } = useContext(UserContext);
+  const { user } = useContext(AuthContext);
+  const [follower, setFollower] = useState(false);
+  const fetchFollower = () => {
+    if (userData.user.following.length !== 0) {
+      const check = userData.user.following.filter(
+        (elem) => elem.user._id === user1.owner._id
+      );
+      if (check.length > 0) {
+        setFollower(true);
+      }
+    }
   };
 
-  const renderActiveComponent = () => {
-    switch (activeComponent) {
-      case 1:
-        return <Featured navigation={navigation} />;
-      case 2:
-        return <ColumnView />;
+  useEffect(() => {
+    fetchFollower();
+  }, []);
+
+  const handleFollow = async () => {
+    if (!follower) {
+      await fetch(`${url}/users/follower/add/${user1.owner._id}`, {
+        method: "patch",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user}`,
+        },
+      });
+      setFollower(true);
+    } else {
+      await fetch(`${url}/users/follower/remove/${user1.owner._id}`, {
+        method: "patch",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user}`,
+        },
+      });
+      setFollower(false);
     }
   };
 
   const ListFooterComponent = () => (
     <View>
       <View style={styles.imageicon}>
-        <Avatar.Image source={img1} size={110} />
+        <Avatar.Image
+          source={
+            user1.owner.picture
+              ? {
+                  uri: `${url}/users/picture?path=${user1.owner.picture}`,
+                }
+              : img1
+          }
+          size={110}
+        />
         <Text
           style={{
             fontSize: 18,
@@ -43,86 +77,59 @@ export default function OthersProfile({ navigation }) {
             color: "darkgray",
           }}
         >
-          @alex_johns
+          @{user1.owner.username}
         </Text>
       </View>
 
       <View style={styles.followercount}>
-        <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
-          <Text style={styles.followtext}>180</Text>
+        <View style={{ alignItems: "center", width: "30%" }}>
+          <Text style={styles.followtext}>{user1.owner.following.length}</Text>
           <Text style={{ color: "darkgray" }}>Following</Text>
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
-          <Text style={styles.followtext}>1.2k</Text>
+        <View style={{ alignItems: "center", width: "30%" }}>
+          <Text style={styles.followtext}>{user1.owner.followers.length}</Text>
           <Text style={{ color: "darkgray" }}>Followers</Text>
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
-          <Text style={styles.followtext}>120</Text>
+        <View style={{ alignItems: "center", width: "30%" }}>
+          <Text style={styles.followtext}>{user1.owner.sales}</Text>
           <Text style={{ color: "darkgray" }}>Sales</Text>
-        </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.followercount2}>
-        <TouchableOpacity style={styles.messagebutton}>
+        <TouchableOpacity
+          style={[
+            styles.messagebutton,
+            { backgroundColor: follower ? "red" : "#FF8216" },
+          ]}
+          onPress={handleFollow}
+        >
           <Text
             style={{
               color: "white",
               fontWeight: "bold",
             }}
           >
-            Follow
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsbutton}>
-          <Text style={{ color: "#FF8216", fontWeight: "bold" }}>Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsbutton}>
-          <Text
-            style={{
-              color: "#FF8216",
-              fontWeight: "bold",
-            }}
-          >
-            Hire
+            {follower ? "Following" : "Follow"}
           </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.followercount1}>
-        <TouchableOpacity
-          onPress={() => handleComponentChange(1)}
+        <View
           style={{
-            width: "49%",
-            borderBottomColor: activeComponent === 1 ? "#FF8216" : "white",
+            width: "50%",
+            borderBottomColor: "#FF8216",
             borderBottomWidth: 3,
             alignItems: "center",
           }}
         >
-          <Ionicons
-            name={activeComponent === 1 ? "list" : "list-outline"}
-            color={activeComponent === 1 ? "#FF8216" : "gray"}
-            size={25}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleComponentChange(2)}
-          style={{
-            width: "49%",
-            borderBottomColor: activeComponent === 2 ? "#FF8216" : "white",
-            borderBottomWidth: 3,
-            alignItems: "center",
-          }}
-        >
-          <Ionicons
-            name={activeComponent === 2 ? "grid" : "grid-outline"}
-            color={activeComponent === 2 ? "#FF8216" : "gray"}
-            size={25}
-          />
-        </TouchableOpacity>
+          <Ionicons name={"list"} color={"#FF8216"} size={25} />
+        </View>
       </View>
 
-      {renderActiveComponent()}
+      <OtherProfileVideo navigation={navigation} owner={user1.owner} />
     </View>
   );
   return (
@@ -140,11 +147,15 @@ export default function OthersProfile({ navigation }) {
                 color: "black",
               }}
             >
-              Alex Johns
+              {user1.owner.username}
             </Text>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-horizontal" color={"black"} size={30} />
+          <TouchableOpacity disabled>
+            <Ionicons
+              name="ellipsis-horizontal"
+              color={"transparent"}
+              size={30}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -193,7 +204,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: "85%",
     alignSelf: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
   },
   followtext: { fontSize: 20, fontWeight: "semibold", color: "black" },
@@ -207,11 +218,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   messagebutton: {
-    backgroundColor: "#FF8216",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 30,
-    width: 90,
+    width: 150,
     marginRight: 3,
     height: 30,
   },

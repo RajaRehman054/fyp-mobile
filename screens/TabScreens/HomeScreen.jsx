@@ -12,7 +12,6 @@ import { Avatar } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Featured from "../../components/HomeScreenComp/Featured";
 import Following from "../../components/HomeScreenComp/Following";
-import Watch from "../../components/HomeScreenComp/Watch";
 import { UserContext } from "../../context/UserContext";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -86,22 +85,6 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleScreenPress(2)}
-            style={{
-              borderBottomColor: activeScreenIndex === 2 ? "#FF8216" : "white",
-              borderBottomWidth: 3,
-            }}
-          >
-            <Text
-              style={{
-                color: activeScreenIndex === 2 ? "#FF8216" : "gray",
-                fontWeight: "bold",
-              }}
-            >
-              Watch
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
             onPress={() =>
               navigation.navigate("Notification", {
                 user: userData,
@@ -122,13 +105,10 @@ export default function HomeScreen({ navigation }) {
         onMomentumScrollEnd={handleScroll}
       >
         <SafeAreaView style={styles.screen}>
-          <Featured navigation={navigation} profile={false} />
+          <Featured navigation={navigation} />
         </SafeAreaView>
         <SafeAreaView style={styles.screen}>
           <Following navigation={navigation} />
-        </SafeAreaView>
-        <SafeAreaView style={styles.screen}>
-          <Watch navigation={navigation} />
         </SafeAreaView>
       </ScrollView>
     </SafeAreaView>
@@ -146,7 +126,7 @@ const styles = StyleSheet.create({
     width: "95%",
     height: "100%",
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   screen: { backgroundColor: "#d9d9d9", flex: 1, width: SCREEN_WIDTH },

@@ -45,6 +45,10 @@ export default function PostContentScreen({ navigation, route }) {
         },
       });
       if (response.ok) {
+        Toast.show({
+          type: "success",
+          text1: "Our Team is reviewing video for Obsene Content",
+        });
         navigation.navigate("TabNavigator");
       } else {
         console.log("error");

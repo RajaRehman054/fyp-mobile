@@ -15,7 +15,7 @@ import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
 
-export default function Following({ navigation, render }) {
+export default function OtherProfileVideo({ navigation, render, owner }) {
   const [heartFilled, setHeartFilled] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
@@ -24,9 +24,9 @@ export default function Following({ navigation, render }) {
     setHeartFilled(!heartFilled);
   };
 
-  const getVideos = async () => {
+  const getOwnerVideos = async () => {
     setLoading(true);
-    const res = await fetch(`${url}/videos/followers`, {
+    const res = await fetch(`${url}/videos/other/${owner._id}`, {
       headers: {
         "content-type": "application/json",
         Authorization: `Bearer ${user}`,
@@ -39,7 +39,7 @@ export default function Following({ navigation, render }) {
 
   useFocusEffect(
     useCallback(() => {
-      getVideos();
+      getOwnerVideos();
       return () => setData([]);
     }, [render])
   );
@@ -59,13 +59,7 @@ export default function Following({ navigation, render }) {
             size={45}
           />
           <View style={{ marginLeft: 10 }}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("OthersProfile", {
-                  user1: item,
-                })
-              }
-            >
+            <View>
               <Text
                 style={{
                   fontSize: 15,
@@ -75,7 +69,7 @@ export default function Following({ navigation, render }) {
               >
                 {item.owner.username}
               </Text>
-            </TouchableOpacity>
+            </View>
             <Text style={{ fontSize: 10, color: "gray" }}>
               {item.created_on}
             </Text>
@@ -135,14 +129,7 @@ export default function Following({ navigation, render }) {
   return (
     <SafeAreaView style={styles.screen}>
       {data.length === 0 ? (
-        <View
-          style={{
-            alignSelf: "center",
-            height: 200,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <View style={{ alignSelf: "center" }}>
           <Text
             style={{
               color: "#FF8216",
@@ -170,7 +157,7 @@ const styles = StyleSheet.create({
     height: "50%",
     width: "92%",
   },
-  screen: { backgroundColor: "#d9d9d9", flex: 1 },
+  screen: { backgroundColor: "white", flex: 1 },
   contentbar: {
     backgroundColor: "white",
     height: 350,

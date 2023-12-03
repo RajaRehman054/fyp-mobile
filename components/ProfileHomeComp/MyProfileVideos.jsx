@@ -14,19 +14,24 @@ import VideoPlayer from "../VideoPlayerComp/VideoPlayer";
 import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
+import DeleteModal from "../ProfileHomeComp/DeleteModal";
 
-export default function Following({ navigation, render }) {
+export default function MyProfileVideos({ render }) {
   const [heartFilled, setHeartFilled] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const onPressHeart = () => {
     setHeartFilled(!heartFilled);
   };
+  const onCloseModal = (visible) => {
+    setModalVisible(visible);
+  };
 
   const getVideos = async () => {
     setLoading(true);
-    const res = await fetch(`${url}/videos/followers`, {
+    const res = await fetch(`${url}/videos/myvideos`, {
       headers: {
         "content-type": "application/json",
         Authorization: `Bearer ${user}`,
@@ -59,13 +64,7 @@ export default function Following({ navigation, render }) {
             size={45}
           />
           <View style={{ marginLeft: 10 }}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("OthersProfile", {
-                  user1: item,
-                })
-              }
-            >
+            <TouchableOpacity>
               <Text
                 style={{
                   fontSize: 15,
@@ -81,12 +80,8 @@ export default function Following({ navigation, render }) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity disabled>
-          <Ionicons
-            name="ellipsis-horizontal"
-            color={"transparent"}
-            size={30}
-          />
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="ellipsis-horizontal" color={"black"} size={30} />
         </TouchableOpacity>
       </View>
 
@@ -112,19 +107,13 @@ export default function Following({ navigation, render }) {
           <Ionicons name="chatbox-outline" color={"gray"} size={25} />
           <Text style={{ color: "gray" }}>16</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.icon}
-          onPress={() =>
-            navigation.navigate("BuyContent", {
-              video: item,
-            })
-          }
-        >
-          <Ionicons name="download-outline" color={"gray"} size={25} />
-          <Text style={{ color: "gray" }}>16</Text>
-        </TouchableOpacity>
       </View>
+
+      <DeleteModal
+        modalVisible={modalVisible}
+        onCloseModal={onCloseModal}
+        user={item}
+      />
     </View>
   );
 
@@ -182,7 +171,6 @@ const styles = StyleSheet.create({
     width: "92%",
     height: "15%",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   profilebar: {

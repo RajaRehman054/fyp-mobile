@@ -43,8 +43,12 @@ export default function NewsJobsScreen({ navigation }) {
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <View style={styles.uppertab}>
         <View style={styles.innertab}>
-          <TouchableOpacity>
-            <Ionicons name="paper-plane-outline" color={"black"} size={30} />
+          <TouchableOpacity disabled>
+            <Ionicons
+              name="paper-plane-outline"
+              color={"transparent"}
+              size={30}
+            />
           </TouchableOpacity>
           <View
             style={{

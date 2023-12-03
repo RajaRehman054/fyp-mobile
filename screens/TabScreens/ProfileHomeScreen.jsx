@@ -14,19 +14,21 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Avatar } from "react-native-paper";
 import * as ImagePicker from "react-native-image-picker/";
-
-import Featured from "../../components/HomeScreenComp/Featured";
-import ColumnView from "../../components/ColumnView";
 import { UserContext } from "../../context/UserContext";
 import { AuthContext } from "../../auth/AuthContext";
 import url from "../../utils/url";
 import WalletModal from "../../components/ProfileHomeComp/WalletModal";
-
-const img1 = require("../../assets/img1.png");
+import FollowingModal from "../../components/ProfileHomeComp/FollowingModal";
+import FollowerModal from "../../components/ProfileHomeComp/FollowerModal";
+import MyProfileVideos from "../../components/ProfileHomeComp/MyProfileVideos";
+import ColumnView from "../../components/ProfileHomeComp/ColumnView";
+import img1 from "../../assets/img1.png";
 
 export default function ProfileHomeScreen({ navigation }) {
   const [activeScreenIndex, setActiveScreenIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
+  const [followingmodalVisible, setFollowingModalVisible] = useState(false);
+  const [followermodalVisible, setFollowerModalVisible] = useState(false);
   const [render, setRender] = useState(false);
   const { userData, getUser } = useContext(UserContext);
   const { user } = useContext(AuthContext);
@@ -34,6 +36,13 @@ export default function ProfileHomeScreen({ navigation }) {
 
   const onCloseModal = (visible) => {
     setModalVisible(visible);
+  };
+
+  const onCloseModal1 = (visible) => {
+    setFollowingModalVisible(visible);
+  };
+  const onCloseModal2 = (visible) => {
+    setFollowerModalVisible(visible);
   };
 
   const selectImage = () => {
@@ -175,24 +184,30 @@ export default function ProfileHomeScreen({ navigation }) {
         </View>
 
         <View style={styles.followercount}>
-          <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
+          <TouchableOpacity
+            style={{ alignItems: "center", width: "30%" }}
+            onPress={() => setFollowingModalVisible(true)}
+          >
             <Text style={styles.followtext}>
               {userData.user.following.length || 0}
             </Text>
             <Text style={{ color: "darkgray" }}>Following</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
+          <TouchableOpacity
+            style={{ alignItems: "center", width: "30%" }}
+            onPress={() => setFollowerModalVisible(true)}
+          >
             <Text style={styles.followtext}>
               {userData.user.followers.length || 0}
             </Text>
             <Text style={{ color: "darkgray" }}>Followers</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ alignItems: "center", width: "30%" }}>
+          <View style={{ alignItems: "center", width: "30%" }}>
             <Text style={styles.followtext}>{userData.user.sales}</Text>
             <Text style={{ color: "darkgray" }}>Sales</Text>
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.followercount1}>
@@ -226,21 +241,6 @@ export default function ProfileHomeScreen({ navigation }) {
               size={25}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleScreenPress(2)}
-            style={{
-              width: "30%",
-              borderBottomColor: activeScreenIndex === 2 ? "#FF8216" : "white",
-              borderBottomWidth: 3,
-              alignItems: "center",
-            }}
-          >
-            <Ionicons
-              name={activeScreenIndex === 2 ? "bookmark" : "bookmark-outline"}
-              color={activeScreenIndex === 2 ? "#FF8216" : "gray"}
-              size={25}
-            />
-          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -251,19 +251,26 @@ export default function ProfileHomeScreen({ navigation }) {
           onMomentumScrollEnd={handleScroll}
         >
           <SafeAreaView style={styles.screen}>
-            <Featured profile={true} render={render} />
+            <MyProfileVideos render={render} />
           </SafeAreaView>
           <SafeAreaView style={styles.screen1}>
             <ColumnView />
-          </SafeAreaView>
-          <SafeAreaView style={styles.screen}>
-            <Featured profile={true} />
           </SafeAreaView>
         </ScrollView>
       </ScrollView>
       <WalletModal
         modalVisible={modalVisible}
         onCloseModal={onCloseModal}
+        user={userData.user}
+      />
+      <FollowingModal
+        modalVisible={followingmodalVisible}
+        onCloseModal={onCloseModal1}
+        user={userData.user}
+      />
+      <FollowerModal
+        modalVisible={followermodalVisible}
+        onCloseModal={onCloseModal2}
         user={userData.user}
       />
     </SafeAreaView>
