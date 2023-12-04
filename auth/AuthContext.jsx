@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, createContext, useEffect } from 'react';
+import {removeFCM} from '../utils/pushNotifications';
 
 export const AuthContext = createContext();
 
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
 	};
 	const logOut = async () => {
 		setLoading(true);
+		await removeFCM();
 		await AsyncStorage.removeItem('user');
 		setUser(null);
 		setLoading(false);

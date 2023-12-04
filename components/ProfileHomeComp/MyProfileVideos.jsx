@@ -15,6 +15,7 @@ import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
 import DeleteModal from "../ProfileHomeComp/DeleteModal";
+import TimeAgo from "react-native-timeago";
 
 export default function MyProfileVideos({ render }) {
   const [heartFilled, setHeartFilled] = useState(false);
@@ -75,9 +76,7 @@ export default function MyProfileVideos({ render }) {
                 {item.owner.username}
               </Text>
             </TouchableOpacity>
-            <Text style={{ fontSize: 10, color: "gray" }}>
-              {item.created_on}
-            </Text>
+            <TimeAgo style={{ fontSize: 10, color: "gray" }} time={item.created_on} />
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>

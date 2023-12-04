@@ -14,6 +14,7 @@ import VideoPlayer from "../VideoPlayerComp/VideoPlayer";
 import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../Loader";
 import { useFocusEffect } from "@react-navigation/native";
+import TimeAgo from "react-native-timeago";
 
 export default function Following({ navigation, render }) {
   const [heartFilled, setHeartFilled] = useState(false);
@@ -76,9 +77,7 @@ export default function Following({ navigation, render }) {
                 {item.owner.username}
               </Text>
             </TouchableOpacity>
-            <Text style={{ fontSize: 10, color: "gray" }}>
-              {item.created_on}
-            </Text>
+            <TimeAgo style={{ fontSize: 10, color: "gray" }} time={item.created_on} />
           </View>
         </View>
         <TouchableOpacity disabled>

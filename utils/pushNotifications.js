@@ -9,6 +9,16 @@ export const getFCM = async () => {
 	}
 };
 
+export const removeFCM = async () => {
+	try {
+		const fcmToken = await messaging().deleteToken();
+		return fcmToken;
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+
 export const requestUserPermission = async () => {
 	const authStatus = await messaging().requestPermission();
 	const enabled =
