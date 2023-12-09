@@ -85,8 +85,8 @@ export default function NewsJobsScreen({ navigation }) {
               </Text>
             )}
           </View>
-          <TouchableOpacity>
-            <Ionicons name="earth" color={"black"} size={30} />
+          <TouchableOpacity disabled>
+            <Ionicons name="earth" color={"transparent"} size={30} />
           </TouchableOpacity>
         </View>
       </View>

@@ -44,7 +44,6 @@ export default function CurrentlyHired() {
       console.log(err);
     }
   };
-  getHiredJob();
 
   useFocusEffect(
     useCallback(() => {

@@ -134,18 +134,25 @@ export default function Featured({ navigation, render }) {
   return (
     <SafeAreaView style={styles.screen}>
       {data.length === 0 ? (
-        <View style={{ alignSelf: "center", height: 40 }}>
-          <Text
-            style={{
-              color: "#FF8216",
-              textAlign: "center",
-              fontWeight: "bold",
-              fontSize: 20,
-            }}
-          >
-            No videos to Show
-          </Text>
-        </View>
+        <View
+        style={{
+          alignSelf: "center",
+          height: 200,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#FF8216",
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 20,
+          }}
+        >
+          No videos to Show
+        </Text>
+      </View>
       ) : (
         <FlatList
           data={data}

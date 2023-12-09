@@ -30,6 +30,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import Orientation from "react-native-orientation-locker";
 import { UserContext } from "../../context/UserContext";
 import Loader from "../../components/Loader";
+import Geolocation from '@react-native-community/geolocation';
+import Geocoder from 'react-native-geocoding';
+Geocoder.init("AIzaSyCIAQSWoAC-7bSHWyUEcUdUGwUfiEWqF3U"); 
 
 const path = fs.DocumentDirectoryPath + "/test.png";
 fs.readFileAssets("images/image.png", "base64")
@@ -49,6 +52,7 @@ Reanimated.addWhitelistedNativeProps({
 
 export default function CameraRecording({ navigation, route }) {
   const { userData } = useContext(UserContext);
+  const [location, setLocation] = useState({ city: 'Islamabad', country: 'Pakistan' });
   const [displayText, setDisplayText] = useState("");
   const [recording, setRecording] = useState(false);
   const [direction, setDirection] = useState("back");
@@ -63,6 +67,32 @@ export default function CameraRecording({ navigation, route }) {
   const img1 = require("../../assets/penguin.gif");
   const [hirer, setHirer] = useState([]);
   const [isRecordingInProgress, setIsRecordingInProgress] = useState(false);
+  
+  const [address, setAddress] = useState("");
+
+  const getCurrentLocation = () => {
+    // Get current position
+    Geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        Geocoder.from(latitude, longitude)
+          .then(json => {
+            const formattedAddress = json.results[0].formatted_address;
+            if (formattedAddress) {
+              const addressParts = formattedAddress.split(', ');
+              const extractedCity = addressParts[2];
+              const extractedCountry = addressParts[addressParts.length - 1];
+              setAddress(formattedAddress);
+              setLocation({ city: extractedCity, country: extractedCountry });
+            }
+          })
+          .catch(error => console.warn(error));
+      },
+      error => console.warn(error),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  };
+
   useFocusEffect(
     useCallback(() => {
       Orientation.lockToLandscape();
@@ -72,6 +102,9 @@ export default function CameraRecording({ navigation, route }) {
       };
     }, [])
   );
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
 
   useEffect(() => {
     if (userData.user.hirer !== null) {
@@ -123,6 +156,7 @@ export default function CameraRecording({ navigation, route }) {
     setIsRecordingInProgress(true);
     const watermarkText =
       userData.user.hirer === null ? userData.user.username : hirer.username;
+    const watermarkText2 = `${location.city} ${location.country}`;
     setRecording(true);
     setIsStopwatchStart(true);
     await cameraRef.current.startRecording({
@@ -132,13 +166,14 @@ export default function CameraRecording({ navigation, route }) {
         setLoading(true);
         setRecording(false);
         const output = video.path.split(".mp4") + "con.mp4";
-        const command = `-i ${video.path} -i ${path} -filter_complex "[0:v][1:v] overlay=x=(main_w-overlay_w):0,drawtext=fontfile=/system/fonts/DroidSans.ttf:text='${watermarkText}': x=w-tw-50:y=100:fontsize=25:fontcolor=orange" -codec:v libx264 -profile:v high -level:v 4.2 -preset ultrafast -crf 18 -r 30 -movflags +faststart -c:a aac ${output}`;
+        const command = `-i ${video.path} -i ${path} -filter_complex "[0:v][1:v] overlay=x=(main_w-overlay_w):0,drawtext=fontfile=/system/fonts/DroidSans.ttf:text='${watermarkText}':x=w-tw-50:y=100:fontsize=25:fontcolor=orange,drawtext=fontfile=/system/fonts/DroidSans.ttf:text='${watermarkText2}':x=w-tw-50:y=h-th-50:fontsize=25:fontcolor=orange" -codec:v libx264 -profile:v high -level:v 4.2 -preset ultrafast -crf 18 -r 30 -movflags +faststart -c:a aac ${output}`;
         await FFmpegKit.execute(command);
-        navigation.navigate("PostContentScreen", { uri: output });
+        navigation.navigate("PostContentScreen", { uri: output , address:address});
       },
       onRecordingError: (error) => console.error(error),
     });
   };
+  
 
   const stop = async () => {
     await cameraRef.current.stopRecording();

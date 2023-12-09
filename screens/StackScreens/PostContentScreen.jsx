@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect} from "react";
 import {
   Text,
   View,
@@ -15,11 +15,14 @@ import { AuthContext } from "../../auth/AuthContext";
 import Loader from "../../components/Loader";
 import Toast from "react-native-toast-message";
 
+
 export default function PostContentScreen({ navigation, route }) {
+  const { address } = route.params;
   const { user } = useContext(AuthContext);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState("");
+  const [location, setLocation] = useState();
   const uploadVideo = async () => {
     if (tags === "" || text === "") {
       Toast.show({
@@ -124,6 +127,25 @@ export default function PostContentScreen({ navigation, route }) {
               onChangeText={setTags}
             />
           </View>
+          <TouchableOpacity style={{
+              backgroundColor: "#F5F5F5",
+              borderRadius: 10,
+              marginTop: 10,
+              flexDirection:'row',
+              padding:10,
+              justifyContent:'space-between'
+              ,alignItems:'center'
+            }}>
+						<View style={{ }}>
+							<Ionicons
+								name='location-outline'
+								color={'black'}
+								size={25}
+								style={{ alignSelf: 'center' }}
+							/>
+						</View>
+						<Text style={styles.text12}>{address}</Text>
+					</TouchableOpacity>
         </View>
 
         <View style={styles.buttonview}>
